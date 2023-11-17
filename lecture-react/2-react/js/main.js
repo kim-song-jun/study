@@ -7,40 +7,36 @@ class App extends React.Component {
 
     this.state = {
       searchKeyword: "",
-      showResetButton: false,
     };
   }
 
-  setSearchKeyword(searchKeyword) {
-    // setState는 비동기로 동작함
+  handleChangeInput(event) {
+    const searchKeyword = event.target.value;
+
+    if (searchKeyword.length <= 0) {
+      return this.handleReset();
+    }
+
     this.setState({
       searchKeyword: searchKeyword,
     });
   }
 
-  setResetButton(showResetButton) {
-    // setState는 비동기로 동작함
-    this.setState({
-      showResetButton: showResetButton,
-    });
-  }
-
-  handleChangeInput(event) {
-    if (event.target.value.length > 0) {
-      this.setResetButton(true);
-    }
-    this.setSearchKeyword(event.target.value);
-  }
-
   handleSubmit(event) {
-    console.log("[submit]: handleSubmit", this.state.searchKeyword);
     event.preventDefault();
+    console.log("[submit]: handleSubmit", this.state.searchKeyword);
   }
 
   handleReset() {
-    console.log("[click]: handleReset");
-    this.setSearchKeyword("");
-    this.setResetButton(false);
+    // setState는 항상 비동기로 동작함.
+    // 이 함수를 호출한다 하더라도, 바로 state가 반영되지 않음.
+    // 값이 아니라 함수도 전달 할 수 있음
+    this.setState(() => {
+      return { searchKeyword: "" }
+    }, () => {
+      console.log("setState callback", this.state.searchKeyword)
+    })
+    
   }
 
   render() {
@@ -51,7 +47,10 @@ class App extends React.Component {
           <h2 className="container">검색</h2>
         </header>
         <div className="container">
-          <form id="search-form-view" onSubmit={(e) => this.handleSubmit(e)}>
+          <form id="search-form-view" 
+            onSubmit={(e) => this.handleSubmit(e)}
+            onReset={()=> this.handleReset()}
+          >
             <input
               type="text"
               placeholder="검색어를 입력하세요"
@@ -64,11 +63,10 @@ class App extends React.Component {
                 2. 삼항연산자, 
                 3. 그리고 && 사용하는 방법 */}
             {/* js는 첫번째 조건이 참이 되어야 두번째 조건을 실행함... */}
-            {this.state.showResetButton && (
+            {this.state.searchKeyword.length > 0 && (
               <button
                 type="reset"
                 className="btn-reset"
-                onClick={(e) => this.handleReset()}
               ></button>
             )}
           </form>
